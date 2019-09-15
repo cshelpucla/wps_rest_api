@@ -1,0 +1,158 @@
+{
+  "development": {
+    "v4_db": {
+      "name": "v4_db",
+      "type": "mysql",
+      "host": "slg-dev-db.cpibjjjuwtzj.us-west-2.rds.amazonaws.com",
+      "port": 3306,
+      "username": "devuser23452345",
+      "password": "1324234sdnenxsdh",
+      "database": "slg_v4_db",      
+      "synchronize": false,
+      "logging": false,
+      "bigNumberStrings": false,
+      "entities": [
+        "./api/entities/*.ts"
+      ],
+      "migrationsTableName": "migrations",
+      "migrations": ["api/migrations/*.ts"],
+      "cli": {
+          "migrationsDir": "api/migrations"
+      }
+    },
+    "lol_service_db": { 
+      "name": "lol_service_db",
+      "type": "mysql",
+      "host": "slg-dev-db.cpibjjjuwtzj.us-west-2.rds.amazonaws.com",
+      "port": 3306,
+      "username": "devuser23452345",
+      "password": "1324234sdnenxsdh",
+      "database": "lol_service_db",
+      "synchronize": false,
+      "logging": false,
+      "bigNumberStrings": false,
+      "entities": [
+        "./api/entities/*.ts"
+      ]
+    },
+    "wp_db": { 
+      "name": "wp_db",
+      "type": "mysql",
+      "host": "slg-dev-wp-db.cpibjjjuwtzj.us-west-2.rds.amazonaws.com",
+      "port": 3306,
+      "username": "devuser23452345",
+      "password": "1324234sdnenxsdh",
+      "database": "slgwp_prod",
+      "synchronize": false,
+      "logging": false,
+      "bigNumberStrings": false,
+      "entities": [
+        "./api/entities/*.ts"
+      ]
+    }
+  },
+  "production":  {
+    "v4_db": {
+      "name": "v4_db",
+      "type": "mysql",
+      "host": "slg-dev-db.cpibjjjuwtzj.us-west-2.rds.amazonaws.com",
+      "port": 3306,
+      "username": "devuser23452345",
+      "password": "1324234sdnenxsdh",
+      "database": "slg_v4_db",      
+      "synchronize": false,
+      "logging": false,
+      "bigNumberStrings": false,
+      "entities": [
+        "./api/entities/*.ts"
+      ],
+      "migrationsTableName": "migrations",
+      "migrations": ["api/migrations/*.ts"],
+      "cli": {
+          "migrationsDir": "api/migrations"
+      }
+    },
+    "lol_service_db": { 
+      "name": "lol_service_db",
+      "type": "mysql",
+      "host": "slg-dev-db.cpibjjjuwtzj.us-west-2.rds.amazonaws.com",
+      "port": 3306,
+      "username": "devuser23452345",
+      "password": "1324234sdnenxsdh",
+      "database": "lol_service_db",
+      "synchronize": false,
+      "logging": false,
+      "bigNumberStrings": false,
+      "entities": [
+        "./api/entities/*.ts"
+      ]
+    },
+    "wp_db": { 
+      "name": "wp_db",
+      "type": "mysql",
+      "host": "slg-dev-wp-db.cpibjjjuwtzj.us-west-2.rds.amazonaws.com",
+      "port": 3306,
+      "username": "devuser23452345",
+      "password": "1324234sdnenxsdh",
+      "database": "slgwp_prod",
+      "synchronize": false,
+      "logging": false,
+      "bigNumberStrings": false,
+      "entities": [
+        "./api/entities/*.ts"
+      ]
+    }
+  },
+  "my_local": {
+    "v4_db": {
+      "name": "v4_db",
+      "type": "mysql",
+      "host": "slg-newdata-test.cxq0d0uqqyqt.us-west-1.rds.amazonaws.com",
+      "port": 3306,
+      "username": "iM4A5RLTc1r2",
+      "password": "tGvcog043SGENSos",
+      "database": "slg_v4_db",      
+      "synchronize": false,
+      "logging": true,
+      "bigNumberStrings": false,
+      "entities": [
+        "./api/entities/*.ts"
+      ],
+      "migrationsTableName": "migrations",
+      "migrations": ["api/migrations/*.ts"],
+      "cli": {
+          "migrationsDir": "api/migrations"
+      }
+    },
+    "lol_service_db": { 
+      "name": "lol_service_db",
+      "type": "mysql",
+      "host": "slg-newdata-test.cxq0d0uqqyqt.us-west-1.rds.amazonaws.com",
+      "port": 3306,
+      "username": "iM4A5RLTc1r2",
+      "password": "tGvcog043SGENSos",
+      "database": "lol_service_db",
+      "synchronize": false,
+      "logging": true,
+      "bigNumberStrings": false,
+      "entities": [
+        "./api/entities/*.ts"
+      ]
+    },
+    "wp_db": { 
+      "name": "wp_db",
+      "type": "mysql",
+      "host": "slg-newdata-test.cxq0d0uqqyqt.us-west-1.rds.amazonaws.com",
+      "port": 3306,
+      "username": "iM4A5RLTc1r2",
+      "password": "tGvcog043SGENSos",
+      "database": "slgwp_prod",
+      "synchronize": false,
+      "logging": true,
+      "bigNumberStrings": false,
+      "entities": [
+        "./api/entities/*.ts"
+      ]
+    }
+  }
+}

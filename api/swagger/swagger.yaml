@@ -1,0 +1,1186 @@
+swagger: "2.0"
+info:
+  version: "0.0.14"
+  title: DTL Service
+# during dev, should point to your local machine
+host: localhost:80
+# basePath prefixes all resource paths
+basePath: /
+#
+schemes:
+  # tip: remove http to make production-grade
+  - http
+  - https
+# format of bodies a client can send (Content-Type)
+consumes:
+  - application/json
+  - application/octet-stream #smell, this is necessary because supertest appears to send this content type for empty posts
+# format of the responses to the client (Accepts)
+produces:
+  - application/json
+  - text/plain
+  - text/html
+paths:
+  /findWpExperience/tree/{experienceId}:
+    x-swagger-router-controller: WpController
+    get:
+      description: Get Experience Structure by Experience ID
+      operationId: getExperienceStructure
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  ### refers to MYSQL view that contains JOIN from experience to venue using 
+  ### WP taxanomy structure that provides 
+  ### a DIRECT experience to venues relationships to support geo-location 
+  ### searches by geo location (lat lng) AND by venue_id
+  /findByGeoLocation/venue/{venueId}:
+    x-swagger-router-controller: WpGeoLocationController
+    get:
+      description: Get Experience Structure by Experience ID
+      operationId: findByGeoLocation
+      parameters:
+      - name: venueId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Venue
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"  
+  /findByGeoLocation/query/{entityName}:
+    x-swagger-router-controller: WpGeoLocationController
+    post:
+      description: Get Experience Structure by Experience ID
+      operationId: findByGeoLocationPost
+      parameters:
+      - name: entityName
+        type: string
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: body
+        in: body
+        required: true
+        description: JSON document with geo query parameters 
+        schema:
+          type: object
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"  
+  /setsqltrace/{level}:
+    x-swagger-router-controller: ORMLoggerController
+    post:
+      description: Turn ORM logging on or off 
+      operationId: setORMTrace
+      parameters:
+      - name: level
+        type: string
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PlayerStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findUsersWithAllianceMeta/users:
+    x-swagger-router-controller: PlayerController
+    post:
+      description: Find Users with Alliance Metadata by list of User IDs
+      operationId: findUsersWithAllianceMeta
+      parameters:
+        - name: body
+          in: body
+          description: JSON document that has teams and their related summonerIds and metadata
+          required: true
+          schema:
+            type: object
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findAllUserAlliances/alliances:
+    x-swagger-router-controller: PlayerController
+    post:
+      description: Find User-Alliances by list of Alliance IDs
+      operationId: findAllUserAlliances
+      parameters:
+        - name: body
+          in: body
+          description: JSON document that has teams and their related summonerIds and metadata
+          required: true
+          schema:
+            type: object
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/UserAlliancesResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+## atomic entity operations
+  # /test:
+  #   x-swagger-router-controller: TestController
+  #   get:
+  #     description: test
+  #     operationId: migrateUp
+  #     responses:
+  #       "200":
+  #         description: success
+  /migrations/up:
+    x-swagger-router-controller: MigrationsController
+    get:
+      description: Run all pending migrations
+      operationId: migrateUp
+      parameters:
+        - name: token
+          in: query
+          type: string
+          required: false
+          description: Access token to run migrations
+      responses:
+        "200":
+          description: Success
+        "default":
+          description: Error
+          schema:
+              $ref: "#/definitions/ErrorResponse"
+  /migrations/down:
+    x-swagger-router-controller: MigrationsController
+    get:
+      description: Run all pending migrations
+      operationId: migrateDown
+      parameters:
+        - name: token
+          in: query
+          type: string
+          required: false
+          description: Access token to run migrations
+      responses:
+        "200":
+          description: Success
+        "default":
+          description: Error
+          schema:
+              $ref: "#/definitions/ErrorResponse"
+  /angrybirds/game:
+    x-swagger-router-controller: AngryBirdsController
+    post:
+      description: Post game data to be saved
+      operationId: saveGameData
+      parameters:
+        - name: gameData
+          schema:
+            type: object
+          in: body
+          required: true
+          description: Game Data
+      responses:
+        "201":
+          description: Success, Game Data Saved
+        "default":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /angrybirds/leaderboard:
+    x-swagger-router-controller: AngryBirdsController
+    get:
+      description: Get a rolled up leaderboard for angry birds
+      operationId: getLeaderboard
+      parameters:
+        - name: eventId
+          in: query
+          type: number
+          required: false
+          description: eventId for leaderboard, no param is all events
+        - name: ranked
+          in: query
+          type: number
+          required: false
+          description: determines whether all players or only ranked players should appear.  0 for all players (default), 1 for ranked players only.
+      responses:
+        "200":
+          description: Success
+        "default":
+          description: Error
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /{entityName}/{entityId}:
+    x-swagger-router-controller: ORMController
+    get:
+      description: Get specific entity
+      operationId: findEntity
+      parameters:
+        - name: entityName
+          type: string
+          in: path
+          required: true
+          description: entity name
+        - name: entityId
+          type: number
+          in: path
+          required: true
+          description: The id of the entity          
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    put:
+      description: update entity
+      operationId: updateEntity
+      parameters:
+        - name: entityName
+          type: string
+          in: path
+          required: true
+          description: Indicates this request is an automated test request
+        - name: entityId
+          type: number
+          in: path
+          required: true
+          description: The id of the entity
+        - name: bodyParam
+          in: body
+          description: JSON document that has teams and their related summonerIds and metadata
+          required: true
+          schema:
+            $ref: "#/definitions/EntityResponse"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    delete:
+      description: Delete specific entity
+      operationId: deleteEntity
+      parameters:
+        - name: entityName
+          type: string
+          in: path
+          required: true
+          description: entity name
+        - name: entityId
+          type: number
+          in: path
+          required: true
+          description: The id of the entity
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /{entityName}:
+    x-swagger-router-controller: ORMController
+    get:
+      description: Get all entities
+      operationId: findAllEntitiesSearch
+      parameters:
+        - name: entityName
+          type: string
+          in: path
+          required: true
+          description: entity name
+        - name: select
+          type: string
+          in: query
+          required: false
+          description: list of fields to return
+        - name: filter
+          type: string
+          in: query
+          required: false
+          description: search experession
+        - name: sort
+          type: string
+          in: query
+          required: false
+          description: list of sort fileds
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+    post:
+      description: creates an entity
+      operationId: createEntity
+      parameters:
+        - name: entityName
+          type: string
+          in: path
+          required: true
+          description: Indicates this request is an automated test request
+        - name: bodyParam
+          in: body
+          description: JSON document that has teams and their related summonerIds and metadata
+          required: true
+          schema:
+            $ref: "#/definitions/EntityResponse"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"                     
+  /findmenow/open:
+    x-swagger-router-controller: ORMController
+    get:
+      description: Get all entities
+      operationId: findAllEntitiesSearch
+      parameters:
+        - name: entityName
+          type: string
+          in: query
+          required: true
+          description: entity name
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"           
+# specific complex operations 
+  /playerbyuserandseries/user/{slgUserId}/series/{seriesId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Get players by User ID and Series ID
+      operationId: getPlayerByUserAndSeries
+      parameters:
+      - name: slgUserId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for User
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PlayerListResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  # /allianceStandings/experience/{experienceId}:
+  #   x-swagger-router-controller: AllianceController
+  #   get:
+  #     description: Get Alliance Standings by Experience ID
+  #     operationId: getAllianceStangings
+  #     parameters:
+  #     - name: experienceId
+  #       type: number
+  #       in: path
+  #       required: true
+  #       description: The unqiue numerical identifier for Experience
+  #     responses:
+  #       "200":
+  #         description: Success
+  #         schema:
+  #           $ref: "#/definitions/AllianceStandingsResponse"
+  #       "default":
+  #         description: Failure
+  #         schema:
+  #           $ref: "#/definitions/ErrorResponse"
+  /allianceStandings/experience/{experienceId}/series/{seriesId}:
+    x-swagger-router-controller: AllianceController
+    get:
+      description: Get Alliance Standings by Experience and Series ID
+      operationId: getAllianceStangings
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AllianceStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findIndPlayerStanding/experience/{experienceId}/series/{seriesId}/event/{eventId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Get Player Standings by Experience, Series, and Event ID
+      operationId: getIndPlayerStanding
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      - name: eventId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Event
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PlayerStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findIndPlayerStandingCustomQry/experience/{experienceId}/series/{seriesId}/event/{eventId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Get Player Standings by Experience, Series, and Event ID
+      operationId: getIndPlayerStandingCustomQry
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      - name: eventId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Event
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PlayerStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findIndPlayerStanding/experience/{experienceId}/series/{seriesId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Get Player Standings by Experience and Series ID
+      operationId: getIndPlayerStanding
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PlayerStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findIndPlayerStanding/experience/{experienceId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Get Player Standings by Experience ID
+      operationId: getIndPlayerStanding
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PlayerStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findIndPlayerStandingFromDB/experience/{experienceId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Get Player Standings by Experience ID
+      operationId: getIndPlayerStandingFromDB
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PlayerStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"          
+# TODO: rename since montly series concept is from v1 services
+  /findMonthlySeriesOptions/experience/{experienceId}/series/{seriesId}/event/{eventId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Find Series Options by Experience, Series, and Event ID
+      operationId: findSeriesOptions
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      - name: eventId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Event
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SeriesResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  # TODO: rename since montly series concept is from v1 services
+  /findMonthlySeriesOptions/experience/{experienceId}/series/{seriesId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Find Series Options by Experience and Series ID
+      operationId: findSeriesOptions
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SeriesResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+# TODO: rename since montly series concept is from v1 services
+  /findMonthlySeriesOptions/experience/{experienceId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Find Series Options by Experience ID
+      operationId:  findSeriesOptions
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/SeriesResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /individualstandings/experience/{experienceId}/series/{seriesId}/event/{eventId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Find Individual Standings by Experience, Series, and Event ID
+      operationId: getIndPlayerStanding
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      - name: eventId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Event
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/IndividualStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /individualstandings/experience/{experienceId}/series/{seriesId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Find Individual Standings by Experience and Series ID
+      operationId: getIndPlayerStanding
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/IndividualStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /individualstandings/experience/{experienceId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Find Individual Standings by Experience ID
+      operationId: getIndPlayerStanding
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/IndividualStandingsResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findAllPlayers/experience/{experienceId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Find Players by Experience ID
+      operationId: findAllPlayers
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PlayerListResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findAllPlayersWithMeta/experience/{experienceId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Find Players with Metadata by Experience ID
+      operationId: findAllPlayersWithMeta
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/PlayersWithMetaResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"          
+# word press schema operations
+  /seriesalliances/series/{seriesId}:
+    x-swagger-router-controller: WpController
+    get:
+      description: Get Alliances by Series ID
+      operationId: getSeriesAlliance
+      parameters:
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AllianceListResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /eventsbyseries/series/{seriesId}:
+    x-swagger-router-controller: WpController
+    get:
+      description: Get Events by Series ID
+      operationId: getEventBySeriesId
+      parameters:
+        - name: seriesId
+          type: number
+          in: path
+          required: true
+          description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EventListResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"            
+  /findAllAlliances/series/{seriesId}:
+    x-swagger-router-controller: WpController
+    get:
+      description: Find Alliances by Series ID
+      operationId: findAllAlliancesBySeries
+      parameters:
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AllianceListResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findAllAlliancesByExperience/experience/{experienceId}/series/{seriesId}:
+    x-swagger-router-controller: WpController
+    get:
+      description: Find Alliances by Experience and Series ID
+      operationId: findAllAlliancesByExperience
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AllianceListResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findAllAlliancesByExperience/experience/{experienceId}:
+    x-swagger-router-controller: WpController
+    get:
+      description: Find Alliances by Experience ID
+      operationId: findAllAlliancesByExperience
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AllianceListResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findAllSeries/experience/{experienceId}:
+    x-swagger-router-controller: WpController
+    get:
+      description: Find Alliance by Series and User ID
+      operationId: findAllSeriesByExperience
+      parameters:
+      - name: experienceId
+        type: number
+        in: path
+        required: true
+        description: get all associated series for experience
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/Series"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findExperience/slug/{slugId}:
+    x-swagger-router-controller: WpController
+    get:
+      description: Find Experience by WP Experience Slug
+      operationId: findExperienceBySlug
+      parameters:
+      - name: slugId
+        type: string
+        in: path
+        required: true
+        description: WordPress Experience Slug
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/Experience"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"            
+  /findLowestUserCountAlliance/series/{seriesId}:
+    x-swagger-router-controller: AllianceController
+    get:
+      description: Find Alliance with fewest players by Series ID
+      operationId: findLowestUserCountAlliance
+      parameters:
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/AllianceUserCountResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /findUserAlliance/series/{seriesId}/user/{userId}:
+    x-swagger-router-controller: AllianceController
+    get:
+      description: Find Alliance by Series and User ID
+      operationId: findUserAlliance
+      parameters:
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      - name: userId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for User
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/Alliance"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
+  /stats/lol/updateCallBack:
+    x-swagger-router-controller: LolGameStatsController
+    post:
+      description: creates an entity
+      operationId: updateLoLCallBackPost
+      parameters:
+        - name: body
+          in: body
+          description: JSON document that has teams and their related summonerIds and metadata
+          required: true
+          schema:
+            $ref: "#/definitions/EntityResponse"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"          
+  /stats/lol/updateGameStats:
+    x-swagger-router-controller: LolGameStatsController
+    post:
+      description: creates an entity
+      operationId: updateLoLGameStatsPost
+      parameters:
+        - name: body
+          in: body
+          description: JSON document that has teams and their related summonerIds and metadata
+          required: true
+          schema:
+            $ref: "#/definitions/EntityResponse"
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"          
+### Not in use for now ###
+  /playerbyuserseries/{userId}/{seriesId}:
+    x-swagger-router-controller: PlayerController
+    get:
+      description: Assign user to alliance
+      operationId: findPlayerByUserSeries
+      parameters:
+      - name: userId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for User
+      - name: seriesId
+        type: number
+        in: path
+        required: true
+        description: The unqiue numerical identifier for Series
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/Player"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"         
+  # /eventsbyseries/series/{seriesId}:
+  #   x-swagger-router-controller: ORMController
+  #   get:
+  #     description: Get all entities
+  #     operationId: findAllEntities
+  #     parameters:
+  #       - name: seriesId
+  #         type: number
+  #         in: path
+  #         required: true
+  #         description: entity name
+  #     responses:
+  #       "200":
+  #         description: Success
+  #         schema:
+  #           $ref: "#/definitions/EntityResponse"
+  #       "default":
+  #         description: Failure
+  #         schema:
+  #           $ref: "#/definitions/ErrorResponse"           
+# complex objects have schema definitions
+definitions:
+  EntityArrayResponse:
+    type: array
+    items: 
+         type: object
+  EntityResponse:
+    type: object
+  # Response definitions
+  ErrorResponse:
+    required:
+      - type
+      - code
+      - message
+    properties:
+      type:
+        type: string
+      code:
+        type: number
+      message:
+        type: string
+  AllianceListResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/Alliance"
+  AllianceUserCountResponse:
+    type: object
+  EventListResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/Event"
+  PlayerListResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/Player"
+  SeriesListResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/Series"
+  AllianceStandingsResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/AllianceStanding"
+  PlayerStandingsResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/PlayerStanding"
+  # TODO: rename since montly series concept is from v1 services
+  SeriesResponse:
+    required:
+      - optionsData
+      - selected
+    properties:
+      # TODO: rename since weekly series concept is from v1 services
+      # The array of weekly series options
+      optionsData:
+        type: array
+        items:
+          $ref: "#/definitions/EventOption"
+      selected:
+        $ref: "#/definitions/SeriesOption"
+  IndividualStandingsResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/IndividualStanding"
+  PlayersWithMetaResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/PlayerWithMeta"
+  UsersWithAllianceMetaResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/UserWithAllianceMeta"
+  UserAlliancesResponse:
+    type: array
+    items: 
+      $ref: "#/definitions/UserAlliance"
+  # Base definitions
+  Alliance:
+    type: object
+  AllianceStanding:
+    type: object
+  Event:
+    type: object
+  Experience:
+    type: object
+  ExperienceWp:
+    type: object
+  IndividualStanding:
+    type: object
+  Player:
+    type: object
+  PlayerStanding:
+    type: object
+  UserAlliance:
+    type: object
+  # TODO: probably need to be more specific about the included metadata
+  PlayerWithMeta:
+    type: object
+  Series:
+    type: object
+  SeriesOption:
+    type: object
+  UserWithAllianceMeta:
+    type: object
+  # TODO: rename since weekly series concept is from v1 services
+  EventOption:
+    required:
+      - optionsData
+      - selected
+    properties:
+      # The array of series options
+      optionsData:
+        type: array
+        items:
+          $ref: "#/definitions/SeriesOption"
+      selected:
+        type: boolean
+# complex objects have schema definitions
+
