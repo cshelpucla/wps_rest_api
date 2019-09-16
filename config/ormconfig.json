@@ -10,8 +10,7 @@
       "database": "wps_data",      
       "logging": false,
       "bigNumberStrings": false,
-      "cache": true,
-      "synchronize": true,
+      "synchronize": false,
       "entities": [
         "./api/entities/*.ts"
       ],
@@ -31,10 +30,9 @@
       "username": "admin",
       "password": "cshelpaws",
       "database": "wps_data",      
-      "synchronize": true,
+      "synchronize": false,
       "logging": false,
       "bigNumberStrings": false,
-      "cache": true,
       "entities": [
         "./api/entities/*.ts"
       ],
