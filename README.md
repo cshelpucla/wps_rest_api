@@ -30,6 +30,12 @@ Basic architectural notes on what tools were used to build the service:
    
 8. It is fairly simple to add new tables to this service and it was designed to allow very simple process for transitioning SQL access      to table entities into REST API paradime.   
 
+9. code lives in this location on 59.9.30.45 machine
+
+   /home/ubuntu/wps_rest_api
+
+   to start the service just run npm start
+
 ### below is list of operations supported by the API in form of example curl calls
 
 ip 52.9.30.45 is public and available - elastic IP on AWS assiged to instance running node.js service
