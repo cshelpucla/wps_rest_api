@@ -1,0 +1,23 @@
+
+Using the following set of tools
+
+https://github.com/google/oatts
+
+https://www.npmjs.com/package/mocha
+
+Here are the steps for install of the tools
+
+  npm install -g mocha 
+  npm install -g mocha 
+  npm install chakram --save-dev
+
+Following command builds basic structures/code for exercising routes exposed by the services
+
+  oatts generate -s ./api/swagger/swagger.yaml -w ./api/swagger/test
+
+Following command runs basic structures for exercising routes exposed by the services
+
+  mocha --recursive ./api/swagger/test
+
+
+
