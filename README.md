@@ -3,24 +3,32 @@ Test for WPS hiring process
 
 Basic architectural notes on what tools were used to build the service:
 
-1. Typescript is used to implement this service and TypeORM is used to support ORM mapping.  Tokenization was implemented using jwt
-
+1. Typescript is used to implement this service and TypeORM is used to support ORM mapping.  
+   https://typeorm.io/#/
+   Auth Tokenization was implemented using jwt module.
+   
 2. I did not implement any sort of caching, so the service is simply reading the database table and accessing sending out query results    without any sort of caching. REDIS of course is a possibility as well as MYSQL itself - if the size of your DBs in 500-900 GB you        could easily fit everything in My SQL cache.  Also TypeORM supports interface to REDIS and is well suited for implmenenting caching
    that is aligned with MYSQL.
 
-3. I did implement security token and created a user and password table - user passwords are all set to wps
+3. I DID implement token-based security authorization and created a user and password table - user passwords are all set to be "wps"
+   Passwords themselves are not obfuscated in any way.
 
-3. MYSQL is running on this location - and is remotely accessible
+4. Node.js service is running on this ip - 52.9.30.45 on port 8080 - I did not implement port forwarding so all curl calls go to a   
+   specific port as well as specific ip.
+
+   MYSQL is running on this location - and is remotely accessible
    
       MYSQL Db name: database-1.cewgppn79emi.us-west-1.rds.amazonaws.com
       user/password: admin/cshelpaws
       
-4. There are two tables there : customer and user - in a schema called wps_data
+5. There are two tables there : customer and user - in a schema called wps_data
 
-5. Both tables can be viewed through REST API calls to appropriate endpoints ( customer and user ) provided an auth token are requested    before hand and are used
+6. Both tables can be viewed through REST API calls to appropriate endpoints ( customer and user ) provided an auth token are requested    before hand and are used
 
-6. I implemented sorting and filtering and field selection in the API calls to provide a more database-like access capabilities in the 
-   API
+7. I implemented sorting and filtering and field selection in the API calls to provide a more database-like access capabilities in the 
+   API for reading the table data/
+   
+8. It is fairly simple to add new tables to this service and it was designed to allow very simple process for transitioning SQL access      to table entities into REST API paradime.   
 
 ### below is list of operations supported by the API in form of example curl calls
 
