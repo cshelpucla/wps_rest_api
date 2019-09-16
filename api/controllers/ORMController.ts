@@ -3,13 +3,18 @@ import { CustomError } from './../helpers/CustomError';
 import { getConnection, MoreThan, LessThan, LessThanOrEqual, MoreThanOrEqual, Not, In, Like, Between } from "typeorm";
 import { NextFunction } from 'express-serve-static-core';
 import { parse, stringify } from 'qs';
-import * as jwt from "jsonwebtoken";
+import * as jwt from 'jsonwebtoken';
+import { any } from "joi";
+import config from "../config/config";
+
+import { user } from "../entities/user";
 
 let typeORMConnectionCORE = null
 
 let esEntries =
 [
     { name: "customer", route: "/customer", db_conn: "" },
+    { name: "user", route: "/user", db_conn: "" },
 ]
 
 class ORMController  {
@@ -35,56 +40,58 @@ class ORMController  {
     }
 
     async getAuth(request: Request | any, response: Response, next: NextFunction)  {
-        let jwtSecret ="test"
+        let jwtSecret = config.jwtSecret
         
-        //Sing JWT, valid for 1 hour
-        const token = jwt.sign({ userId:"arovinsky", username: "alex rovinsky" }, jwtSecret,{ expiresIn: "1h" }  );
+        const { userId, password } = request.swagger.params;   
+
+        var uid = userId.value;
+        var pval = password.value;
+
+        //Sing JWT, valid for - 120 sec
+        const token = jwt.sign({ userId: uid }, jwtSecret,{ expiresIn: 120 }  );
   
         //Send the jwt token in the response      
         try {
-            response.status(200).send(token);
+           let repo = await this.getRepo("user")
+           const results = await repo.find({ userid: uid, password: pval }).
+           then(res => {
+            if (res.length > 0)             
+                response.status(200).send(token);
+             else
+               response.status(401).send();             
+           });           
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
         }        
     }
 
-    checkAuth (req: Request, res: Response, jwtSecret: any)  {
-        //Get the jwt token from the head
-        const token = <string>req.headers["auth"];
-        let jwtPayload;
-        
-        //Try to validate the token and get data
-        try {
-          jwtPayload = <any>jwt.verify(token, jwtSecret);
-          res.locals.jwtPayload = jwtPayload;
-        } catch (error) {
-          //If token is not valid, respond with 401 (unauthorized)          
-          return 401;
-        }
-      
-        //The token is valid for 1 hour
-        //We want to send a new token on every request
-        const { userId, username } = jwtPayload;
-        const newToken = jwt.sign({ userId, username }, jwtSecret, {
-          expiresIn: "1h"
-        });
+    checkAuth(request: Request ) {
+        let jwtSecret = config.jwtSecret
+        let jwtPayload ;
 
-        return newToken;      
-      };
+        const token = <string>request.headers["auth"];
+        try {
+            jwtPayload = <any>jwt.verify(token, jwtSecret);
+            const { userId } = jwtPayload;
+            const newToken = jwt.sign({ userId }, jwtSecret, {  expiresIn: "1h"  });            
+            return newToken
+        } catch (error) {
+            //If token is not valid, respond with 401 (unauthorized) 
+            error.status = 401
+            throw error;         
+        }
+    }
 
     async findEntity(request: Request | any, response: Response, next: NextFunction)  {
-        
         const { entityName, entityId } = request.swagger.params;               
         try {            
-            //let jwtSecret ="test"
-            //let token = this.checkAuth (request, response, jwtSecret);
-            
+            let newToken = this.checkAuth(request)
             let repo = await this.getRepo(entityName.value)
+
             console.log("findEntity : this is entity Id: " + entityId.value )
-            // Caching is implemented here - cache expires in 3 sec
             const results = await repo.findOne({ id: entityId.value  });
-            
-            // response.setHeader("token", token);
+           
+            response.setHeader("token", newToken);            
             response.status(200).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -95,9 +102,11 @@ class ORMController  {
         const { entityName } = request.swagger.params;
         
         try {
+            let newToken = this.checkAuth(request)            
             let repo = await this.getRepo(entityName.value)
             // Caching is implemented here
             const results = await repo.find();
+            response.setHeader("token", newToken);
             response.status(200).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -105,6 +114,7 @@ class ORMController  {
     }
 
     async findAllEntitiesSearch(request: Request | any, response: Response, next: NextFunction)  {
+        let newToken = this.checkAuth(request)
 
         console.log("processing find all search ", request.swagger.params.entityName.value)
         const { entityName, select, filter, sort } = request.swagger.params;
@@ -219,6 +229,7 @@ class ORMController  {
             console.log("query",   queryParams )       
             // Caching is implemented here 
             const results = await repo.find(queryParams);
+            response.setHeader("token", newToken);
             response.status(200).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -230,6 +241,7 @@ class ORMController  {
         try {
             console.log("incoming entityName parameteres ==> " , request.swagger.params.entityName.value)
             console.log("incoming body parameteres  ==> " , request.swagger.params.bodyParam.value)
+            let newToken = this.checkAuth(request)
 
             const entityName= request.swagger.params.entityName;        
             const body= request.swagger.params.bodyParam.value;        
@@ -241,7 +253,7 @@ class ORMController  {
             console.log("updating record incoming body merged " + object)
 
             const results = await repo.save(object);
-            
+            response.setHeader("token", newToken);
             response.status(201).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -253,7 +265,7 @@ class ORMController  {
         try {
             console.log("incoming entityName parameteres ==> " , request.swagger.params.entityName.value)
             console.log("incoming body parameteres  ==> " , request.swagger.params.bodyParam.value)
-
+            let newToken = this.checkAuth(request)
             const entityId= request.swagger.params.entityId;        
             const entityName= request.swagger.params.entityName;        
             const body= request.swagger.params.bodyParam.value;     
@@ -267,7 +279,7 @@ class ORMController  {
             console.log("updated  body merged " + object)
             
             const results = await repo.save(object);
-
+            response.setHeader("token", newToken);
             response.status(200).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -275,13 +287,14 @@ class ORMController  {
     }
 
     async deleteEntity(request: Request | any, response: Response, next: NextFunction) {
-
+ 
         const { entityName, entityId } = request.swagger.params;
         try {
+            let newToken = this.checkAuth(request)
             let repo = await this.getRepo(entityName.value)
 
             const results = await repo.delete({ id: entityId.value });
-
+            response.setHeader("token", newToken);
             response.status(204).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -293,7 +306,8 @@ class ORMController  {
 const ormController =  new ORMController();
 
 module.exports = {
-    
+
+    getAuth        : (req, res, next) => ormController.getAuth(req, res, next),    
     findAllEntities: (req, res, next) => ormController.findAllEntities(req, res, next),
     findEntity:      (req, res, next) => ormController.findEntity(req, res, next),
     updateEntity:    (req, res, next) => ormController.updateEntity(req, res, next),
