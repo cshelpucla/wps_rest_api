@@ -159,7 +159,10 @@ class ORMController  {
         sortColumns.forEach(sc => { 
             let exp = sc.split(/:/)
             console.log("processing find all sort ", exp)
-            sortObj[exp[0]] = exp[1].toUpperCase() 
+            if (exp.length > 1 ) 
+              sortObj[exp[0]] = exp[1].toUpperCase() 
+            else   
+              sortObj[exp[0]] = 'ASC'           
         } );
         
         try {
