@@ -39,7 +39,8 @@ class ORMController  {
         try {
             let repo = await this.getRepo(entityName.value)
             console.log("findEntity : this is entity Id: " + entityId.value )
-            const results = await repo.findOne({ id: entityId.value });
+            // Caching is implemented here - cache expires in 3 sec
+            const results = await repo.findOne({ id: entityId.value, cache: {id: "cache_id", milliseconds: 3000} });
             response.status(200).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -51,7 +52,8 @@ class ORMController  {
         
         try {
             let repo = await this.getRepo(entityName.value)
-            const results = await repo.find();
+            // Caching is implemented here
+            const results = await repo.find({cache: {id: "cache_id", milliseconds: 3000}});
             response.status(200).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -168,8 +170,8 @@ class ORMController  {
             if ( Object.keys(sortObj).length)       { queryParams["order"]  = sortObj        }
 
             console.log("query",   queryParams )       
-            
-            const results = await repo.find(queryParams);
+            // Caching is implemented here 
+            const results = await repo.find(queryParams,{cache: {id: "cache_id", milliseconds: 3000}});
             response.status(200).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -192,6 +194,10 @@ class ORMController  {
             console.log("updating record incoming body merged " + object)
 
             const results = await repo.save(object);
+
+            //Cache expires on insertion of new record
+            await typeORMConnectionCORE.queryResultCache.remove(["cache_id"]);
+
             response.status(201).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -217,6 +223,9 @@ class ORMController  {
             console.log("updated  body merged " + object)
             
             const results = await repo.save(object);
+            //Cache expires on update of new record
+            await typeORMConnectionCORE.queryResultCache.remove(["cache_id"]);
+
             response.status(200).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
@@ -230,6 +239,9 @@ class ORMController  {
             let repo = await this.getRepo(entityName.value)
 
             const results = await repo.delete({ id: entityId.value });
+            //Cache expires on delete of new record
+            await typeORMConnectionCORE.queryResultCache.remove(["cache_id"]);
+
             response.status(204).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
