@@ -51,11 +51,11 @@ curl -H  "auth:XXXX" http://52.9.30.45:8080/customer?filter=age=[41-50],lastName
 ## below is an example of post - adding a new customer ( after requesting an auth key first )
 
 curl "http://52.9.30.45:8080/getAuth?userId=arovinsky&password=wps"
------------- Returned auth key ----------------
+##------------ Returned auth key ----------------
 eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhc58m92aW5za3kiLCJpYXQiOjE1Njg2NDQxMzgsImV4cCI6MTU2ODY0NDM3OH0.EJXI_kCgB_4ws5ImsOvk5fWX7XNSaH64QbfwAx2GGBk
-------------- Auth key used to run create operation ----------------------------------------
+##------------- Auth key used to run create operation ----------------------------------------
 curl -H  "auth:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhcm92aW5za3kiLCJpYXQiOjE1Njg2NDQxMzgsImV4cCI6MTU2ODY0NDM3OH0.EJXI_kCgB_4ws5ImsOvk5fWX7XNSaH64QbfwAx2GGBk" -d '{"firstName": "Dina","lastName": "Boreal","age": 21,"profession": "Chef"}' -H "Content-Type: application/json" -X POST http://52.9.30.45:8080/customer
-------------- result of the create operation ----------------------------------------
+##------------- result of the create operation ----------------------------------------
 {"firstName":"Dina","lastName":"Boreal","age":21,"profession":"Chef","dateCreated":null,"id":9}
 
 ## below is an example of DELETE - removing a customer ( with an auth key )
