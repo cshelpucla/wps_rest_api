@@ -1,0 +1,43 @@
+13.52.130.164 - instance ip
+MYSQL DB user/password - admin/cshelpaws
+my db name - database-2.cn38bblicbo7.us-west-1.rds.amazonaws.com
+
+git clone https://github.com/cshelpucla/wps_rest_api.git
+git pull https://github.com/cshelpucla/wps_rest_api.git
+
+
+
+WPS AWS Logins
+
+Id: 
+User:
+Password:
+
+Elastic IP: 52.9.30.45
+
+ssh login :
+ssh -i c:/users/cshelp/downloads/cshelp_wps.pem 52.9.30.45
+
+
+MYSQL Db name: database-1.cewgppn79emi.us-west-1.rds.amazonaws.com
+user/password: admin/cshelpaws
+
+# loging command line from Windows
+cd C:\Program Files\MySQL\MySQL Server 8.0\bin
+mysql -u admin -h database-1.cewgppn79emi.us-west-1.rds.amazonaws.com -P 3306 -p
+
+## Fix permissions
+
+add following lines to ~/.bashrc after installing npm:
+
+npm set prefix ~/.npm
+PATH="$HOME/.npm/bin:$PATH"
+PATH="./node_modules/.bin:$PATH"
+Execute following line after changes:
+
+source ~/.bashrc
+
+# install typescript and ts-node
+
+npm install -g ts-node
+npm install -g typescript

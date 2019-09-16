@@ -4,50 +4,17 @@ import { getConnection, MoreThan, LessThan, LessThanOrEqual, MoreThanOrEqual, No
 import { NextFunction } from 'express-serve-static-core';
 import { parse, stringify } from 'qs';
 
-let typeORMConnectionWP = null
 let typeORMConnectionCORE = null
-let typeORMConnectionV1DB = null
-
-let transientEntries = [
-    { name: "wp_alliance", route: "/alliances", db_conn: "wp_db" },
-    { name: "experience", route: "/experiences", db_conn: "wp_db" },
-    { name: "wp_event", route: "/events", db_conn: "wp_db" },
-    { name: "wp_series", route: "/series", db_conn: "wp_db" },
-    { name: "wp_game", route: "/wpgames", db_conn: "wp_db" },
-    { name: "venue", route: "/venues", db_conn: "wp_db" },
-]
 
 let esEntries =
 [
-    { name: "player", route: "/players", db_conn: "" },
-    { name: "user_alliance", route: "/useralliances", db_conn: "" },
-    { name: "alliance", route: "/alliances", db_conn: "wp_db" },
-    { name: "experience", route: "/experiences", db_conn: "wp_db" },
-    { name: "event", route: "/events", db_conn: "wp_db" },
-    { name: "series", route: "/series", db_conn: "wp_db" },
-    { name: "game", route: "/games", db_conn: "" },
-    { name: "game_stats", route: "/gamestats", db_conn: "" },
-    { name: "game_team", route: "/gameteams", db_conn: "" },
-    { name: "experience_slug", route: "/experienceslugs", db_conn: "" },
-    { name: "team", route: "/teams", db_conn: "" },
-    { name: "team_player", route: "/teamplayers", db_conn: "" },
-    { name: "game_team", route: "/gameteams", db_conn: "" },
-    { name: "wp_game", route: "/wpgames", db_conn: "wp_db" },
-    { name: "venue", route: "/venues", db_conn: "wp_db" },
-    { name: "user", route: "/users", db_conn: "" },
-    { name: "custom_query_def", route: "/customquerydefs", db_conn: "" },
-    // refers to experience MYSQL view that contains JOIN to WP taxanomy structure that provides 
-    // a DIRECT experience to venues relationships to support geo-location 
-    // searches by geo location (lat lng) AND by venue_id
-    { name: "experience_geo", route: "/experiencegeos", db_conn: "wp_db" },
+    { name: "customer", route: "/customer", db_conn: "" },
 ]
 
 class ORMController  {
 
     constructor() {       
-        typeORMConnectionCORE  = getConnection("v4_db")
-        typeORMConnectionWP    = getConnection("wp_db")
-        typeORMConnectionV1DB  = getConnection("lol_service_db")        
+        typeORMConnectionCORE  = getConnection("wps_data")
      }
 
     async getRepo( entityName: string ) {
@@ -62,7 +29,7 @@ class ORMController  {
        let route = '/' + entityName;
        es = esEntries.find(obj => {return obj.route === route.toLowerCase()});
        console.log("findEntity  : this is entity Name: " + es.name)
-       dbcon = ( es.db_conn != "" ? typeORMConnectionWP : typeORMConnectionCORE )     
+       dbcon = typeORMConnectionCORE     
        return await dbcon.getRepository(es.name)        
     }
 
@@ -208,26 +175,7 @@ class ORMController  {
             response.status(error.status || 500).json(new CustomError(error));
         }        
     }
-
-    async addTransientFileds (entityType: string, records : Object[] ) {
-        let qry = "SELECT p.ID, pm1.meta_key, pm1.meta_value \
-        FROM wp_posts p,  wp_postmeta pm1 \
-	    where p.ID = pm1.post_id \
-        and  post_type in ('experience','wp_series','wp_alliance','wp_series','wp_event','venue') \
-	    and  substring(pm1.meta_value,1,5) <> 'field'  \
-        and  post_type = :entityTypeParm \
-        and  p.ID = :entityId";       
-
-        try {}
-        records.forEach(e => {
-            const data = await typeORMConnectionWP.manager.query(qry, {entityIdParam: e["id"], entityTypeParam:entityType })
-        });
-         }catch(error){
-             
-         }  
-        return records;
-    }
-
+    
     async createEntity(request: Request | any, response: Response, next: NextFunction)  {
 
         try {
