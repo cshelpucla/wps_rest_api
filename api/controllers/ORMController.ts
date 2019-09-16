@@ -3,6 +3,7 @@ import { CustomError } from './../helpers/CustomError';
 import { getConnection, MoreThan, LessThan, LessThanOrEqual, MoreThanOrEqual, Not, In, Like, Between } from "typeorm";
 import { NextFunction } from 'express-serve-static-core';
 import { parse, stringify } from 'qs';
+import * as jwt from "jsonwebtoken";
 
 let typeORMConnectionCORE = null
 
@@ -33,14 +34,57 @@ class ORMController  {
        return await dbcon.getRepository(es.name)        
     }
 
+    async getAuth(request: Request | any, response: Response, next: NextFunction)  {
+        let jwtSecret ="test"
+        
+        //Sing JWT, valid for 1 hour
+        const token = jwt.sign({ userId:"arovinsky", username: "alex rovinsky" }, jwtSecret,{ expiresIn: "1h" }  );
+  
+        //Send the jwt token in the response      
+        try {
+            response.status(200).send(token);
+        } catch (error) {
+            response.status(error.status || 500).json(new CustomError(error));
+        }        
+    }
+
+    checkAuth (req: Request, res: Response, jwtSecret: any)  {
+        //Get the jwt token from the head
+        const token = <string>req.headers["auth"];
+        let jwtPayload;
+        
+        //Try to validate the token and get data
+        try {
+          jwtPayload = <any>jwt.verify(token, jwtSecret);
+          res.locals.jwtPayload = jwtPayload;
+        } catch (error) {
+          //If token is not valid, respond with 401 (unauthorized)          
+          return 401;
+        }
+      
+        //The token is valid for 1 hour
+        //We want to send a new token on every request
+        const { userId, username } = jwtPayload;
+        const newToken = jwt.sign({ userId, username }, jwtSecret, {
+          expiresIn: "1h"
+        });
+
+        return newToken;      
+      };
+
     async findEntity(request: Request | any, response: Response, next: NextFunction)  {
         
         const { entityName, entityId } = request.swagger.params;               
-        try {
+        try {            
+            //let jwtSecret ="test"
+            //let token = this.checkAuth (request, response, jwtSecret);
+            
             let repo = await this.getRepo(entityName.value)
             console.log("findEntity : this is entity Id: " + entityId.value )
             // Caching is implemented here - cache expires in 3 sec
             const results = await repo.findOne({ id: entityId.value  });
+            
+            // response.setHeader("token", token);
             response.status(200).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));

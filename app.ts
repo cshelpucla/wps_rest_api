@@ -16,7 +16,6 @@ const packageJson = require(path.join(__dirname, '.', 'package.json'));
 
 import { CustomError } from "./api/helpers/CustomError";
 
-
 const swaggerConfig = {
     appRoot: __dirname, // required config
 }
@@ -29,7 +28,8 @@ app.use(healthCheck({
     },
     env: [
       'NODE_ENV',
-      'PORT'
+      'PORT',
+      'SECRET'
     ]
   }));
 app.use(bodyParser.json());
@@ -51,6 +51,7 @@ SwaggerExpress.create(swaggerConfig, function(err, swaggerExpress) {
   });
   
   //const port = process.env.PORT || 3060;
+  const secret = process.env.SECRET || "mysecret"
   const port = process.env.PORT || 8080;  
   app.listen(port, function() {   
       console.log('Listening to port: ', port);

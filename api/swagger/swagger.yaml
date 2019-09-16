@@ -22,6 +22,20 @@ produces:
   - text/html
 paths:
 ## atomic entity operations
+  /getauth:
+      x-swagger-router-controller: ORMController
+      get:
+      description: Get specific entity
+      operationId: getAuth
+      responses:
+        "200":
+          description: Success
+          schema:
+            $ref: "#/definitions/EntityResponse"
+        "default":
+          description: Failure
+          schema:
+            $ref: "#/definitions/ErrorResponse"
   /{entityName}/{entityId}:
     x-swagger-router-controller: ORMController
     get:
