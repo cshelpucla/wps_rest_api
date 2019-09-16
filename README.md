@@ -43,7 +43,7 @@ curl -H  "auth:XXXX" http://52.9.30.45:8080/customer
 ## GET all users - replace XXXs with token from previous call
 curl -H  "auth:XXXX" http://52.9.30.45:8080/user
 
-## GET users via query parameters - replace XXXs with token from previous call
+## GET customers via query parameters - replace XXXs with token from previous call
 curl -H  "auth:XXXX" http://52.9.30.45:8080/customer?age=[30-40]&select=firstName,lastName,age&sort=age:ASC
 curl -H  "auth:XXXX" http://52.9.30.45:8080/customer?filter=age=[41-50],lastName=Setts&select=age,profession,lastName
 
