@@ -192,7 +192,7 @@ class ORMController  {
             console.log("updating record incoming body merged " + object)
 
             const results = await repo.save(object);
-            response.status(200).send(results);
+            response.status(201).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
         }
@@ -230,7 +230,7 @@ class ORMController  {
             let repo = await this.getRepo(entityName.value)
 
             const results = await repo.delete({ id: entityId.value });
-            response.status(200).send(results);
+            response.status(204).send(results);
         } catch (error) {
             response.status(error.status || 500).json(new CustomError(error));
         }

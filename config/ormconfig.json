@@ -11,6 +11,7 @@
       "synchronize": false,
       "logging": false,
       "bigNumberStrings": false,
+      "cache": true,
       "entities": [
         "./api/entities/*.ts"
       ],
@@ -33,6 +34,7 @@
       "synchronize": false,
       "logging": false,
       "bigNumberStrings": false,
+      "cache": true,
       "entities": [
         "./api/entities/*.ts"
       ],

@@ -20,6 +20,7 @@ export class DBController  {
         coreDbConfig = envConnections["wps_data"];
         coreDbConfig.logging = true
         coreDbConfig.logger = ormLogger
+        
 
         createConnection(coreDbConfig).then(connection => { 
             console.log("Created connection to wps database : " + connection.name)        
