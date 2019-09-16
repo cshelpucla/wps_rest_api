@@ -175,7 +175,5 @@ definitions:
         type: number
       message:
         type: string
-  Event:
-    type: object
 # complex objects have schema definitions
 
