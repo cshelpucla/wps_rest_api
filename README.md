@@ -74,3 +74,5 @@ curl -H  "auth:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhcm92aW5za3ki
 
 ## below is an example of DELETE - removing a customer ( with an auth key )
 curl -H  "auth:eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOiJhcm92aW5za3kiLCJpYXQiOjE1Njg2NDQ1MTYsImV4cCI6MTU2ODY0NDc1Nn0.KVXIzoCFfyQNubuVUmyXXQqIjnnNdD4ljmvhA4EnS-A" -d '{"firstName": "Dina","lastName": "Boreal","age": 21,"profession": "Chef"}' -H "Content-Type: application/json" -X DELETE http://52.9.30.45:8080/customer/9
+
+## there is also a PUT operation implemented to support record updates.
