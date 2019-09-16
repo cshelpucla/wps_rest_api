@@ -21,35 +21,7 @@ produces:
   - text/plain
   - text/html
 paths:
-  /setsqltrace/{level}:
-    x-swagger-router-controller: ORMLoggerController
-    post:
-      description: Turn ORM logging on or off 
-      operationId: setORMTrace
-      parameters:
-      - name: level
-        type: string
-        in: path
-        required: true
-        description: The unqiue numerical identifier for Experience
-      responses:
-        "200":
-          description: Success
-          schema:
-            $ref: "#/definitions/PlayerStandingsResponse"
-        "default":
-          description: Failure
-          schema:
-            $ref: "#/definitions/ErrorResponse"
 ## atomic entity operations
-  # /test:
-  #   x-swagger-router-controller: TestController
-  #   get:
-  #     description: test
-  #     operationId: migrateUp
-  #     responses:
-  #       "200":
-  #         description: success
   /{entityName}/{entityId}:
     x-swagger-router-controller: ORMController
     get:
