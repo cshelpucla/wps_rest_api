@@ -51,7 +51,7 @@ SwaggerExpress.create(swaggerConfig, function(err, swaggerExpress) {
   });
   
   //const port = process.env.PORT || 3060;
-  const port = process.env.PORT || 80;  
+  const port = process.env.PORT || 8080;  
   app.listen(port, function() {   
       console.log('Listening to port: ', port);
   });
