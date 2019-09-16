@@ -16,11 +16,8 @@ Basic architectural notes on what tools were used to build the service:
 4. Node.js service is running on this ip - 52.9.30.45 on port 8080 - I did not implement port forwarding so all curl calls go to a   
    specific port as well as specific ip.
 
-   MYSQL is running on this location - and is remotely accessible
-   
-      MYSQL Db name: database-1.cewgppn79emi.us-west-1.rds.amazonaws.com
-      user/password: admin/cshelpaws
-      
+   MYSQL is running and is remotely accessible - i'll email u details.
+         
 5. There are two tables there : customer and user - in a schema called wps_data
 
 6. Both tables can be viewed through REST API calls to appropriate endpoints ( customer and user ) provided an auth token are requested    before hand and are used
