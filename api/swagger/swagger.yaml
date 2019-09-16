@@ -160,10 +160,6 @@ paths:
             $ref: "#/definitions/ErrorResponse"                     
 # complex objects have schema definitions
 definitions:
-  EntityArrayResponse:
-    type: array
-    items: 
-         type: object
   EntityResponse:
     type: object
   # Response definitions
@@ -179,13 +175,7 @@ definitions:
         type: number
       message:
         type: string
-  EventListResponse:
-    type: array
-    items: 
-      $ref: "#/definitions/Event"
   Event:
-    type: object
-  Player:
     type: object
 # complex objects have schema definitions
 
