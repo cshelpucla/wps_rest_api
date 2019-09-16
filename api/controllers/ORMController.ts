@@ -114,7 +114,7 @@ class ORMController  {
     }
 
     async findAllEntitiesSearch(request: Request | any, response: Response, next: NextFunction)  {
-        let newToken = this.checkAuth(request)
+        
 
         console.log("processing find all search ", request.swagger.params.entityName.value)
         const { entityName, select, filter, sort } = request.swagger.params;
@@ -220,6 +220,7 @@ class ORMController  {
         } );
         
         try {
+            let newToken = this.checkAuth(request)
             let repo = await this.getRepo(entityName.value)
 
             if ( selectColumns.length > 0)          { queryParams["select"] = selectColumns }
