@@ -48,7 +48,7 @@ class ORMController  {
         var pval = password.value;
 
         //Sing JWT, valid for - 120 sec
-        const token = jwt.sign({ userId: uid }, jwtSecret,{ expiresIn: 120 }  );
+        const token = jwt.sign({ userId: uid }, jwtSecret,{ expiresIn: 240 }  );
   
         //Send the jwt token in the response      
         try {
