@@ -47,7 +47,7 @@
     "swagger-express-mw": "^0.7.0",
     "ts-node-dev": "^1.0.0-pre.42",
     "tsconfig-paths": "^3.8.0",
-    "typeorm": "^0.2.18",
+    "typeorm": "^0.2.25",
     "typescript": "^3.5.1"
   }
 }
